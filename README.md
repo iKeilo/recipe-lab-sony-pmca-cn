@@ -41,6 +41,7 @@
 | v18dsset | 补齐菜单/开发者面板/提示全量汉化 |
 | v19dsset | 内置固件简体字体 + 图例/面板字体接入 |
 | v21dsset | 修复字体注入时机（自定义视图 setFont），全部 Canvas 文本正常渲染 |
+| v22dsset | 新增 X.FINE（Extra Fine）画质档，支持机型为 A7R II / A7S II / A6300 / A6500 / RX100 IV / RX100 V / RX10 II / RX10 III / RX1R II（其他机型不显示该档） |
 | **v1.4.1-cn** | 定稿发布（见上） |
 
 ### 与主线的差异清单（唯一差异 = 汉化）

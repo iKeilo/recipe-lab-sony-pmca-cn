@@ -102,6 +102,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         super.onCreate(b);
         setContentView(R.layout.main);
         prefs = getPreferences(MODE_PRIVATE);
+        Params.xFine = Params.supportsXFine(KeyProbe.prop("model.name"));
         try { ZH = android.graphics.Typeface.createFromFile("/system/fonts/MYingHeiC-GB18030-SJ.ttf"); } catch (Throwable t) { ZH = null; }
         if (ZH == null) try { ZH = android.graphics.Typeface.createFromAsset(getAssets(), "fonts/MYingHeiC-GB18030-SJ.ttf"); } catch (Throwable t) { ZH = null; }
         recipe = Math.max(0, Math.min(Recipes.ALL.length - 1, prefs.getInt("recipe", 0)));
@@ -244,7 +245,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private int readQuality() {
         try {
             int q = Params.qualityFromStore(rdu(ID_QFMT), rdu(ID_QJPG));
-            if (q >= 0) return q;
+            if (q >= 0) return Params.xFine ? q : (q == Params.Q_XFINE ? Params.Q_FINE : q);
             if (camera != null) {
                 Camera.Parameters p = camera.getParameters();
                 return Params.qualityFromRuntime(p.get("storage-fmt"), p.get("jpeg-quality"));
@@ -337,7 +338,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     private void cycleQuality() {
-        edit[R_QUAL] = (edit[R_QUAL] + 1) % 4; qualityChanged(); applyPreview(); render();
+        int[] opts = Params.qualityOptions();
+        int cur = edit[R_QUAL], idx = 0;
+        for (int i = 0; i < opts.length; i++) if (opts[i] == cur) idx = i;
+        edit[R_QUAL] = opts[(idx + 1) % opts.length]; qualityChanged(); applyPreview(); render();
         showToast("画质: " + UiText.value(R_QUAL, edit[R_QUAL], edit) + (qualityPersistent() ? "  — 按中心键应用" : "  (槽位未定位前仅实时预览)"), 2500);
     }
 

@@ -35,12 +35,25 @@ final class Params {
             ID_QFMT2 = 0x01070aa9, ID_QJPG2 = 0x01070aaa;          // the camera keeps mirror copies; written too
 
     // ---- quality: 0 RAW, 1 RAW+JPEG, 2 JPEG Fine, 3 JPEG Std — runtime keys storage-fmt / jpeg-quality
-    static final int Q_RAW = 0, Q_RAWJPG = 1, Q_FINE = 2, Q_STD = 3;
-    static final String[] Q_LABEL = { "RAW", "RAW+JPG", "JPG Fine", "JPG Std" };
-    static final String[] Q_FMT = { "raw", "rawjpeg", "jpeg", "jpeg" };
-    static final String[] Q_JPG = { "50", "50", "50", "25" };
-    static final int[] Q_FMT_CODE = { 1, 2, 0, 0 }, Q_JPG_CODE = { 1, 1, 1, 0 };   // verified: format raw=1 rawjpeg=2 jpeg=0 · jpeg std=0 fine=1
+    static final int Q_RAW = 0, Q_RAWJPG = 1, Q_XFINE = 2, Q_FINE = 3, Q_STD = 4;
+    static final String[] Q_LABEL = { "RAW", "RAW+JPG", "X.FINE", "JPG Fine", "JPG Std" };
+    static final String[] Q_FMT = { "raw", "rawjpeg", "jpeg", "jpeg", "jpeg" };
+    static final String[] Q_JPG = { "50", "50", "50", "50", "25" };
+    static final int[] Q_FMT_CODE = { 1, 2, 0, 0, 0 }, Q_JPG_CODE = { 1, 1, 2, 1, 0 }; // verified: format raw=1 rawjpeg=2 jpeg=0 · jpeg std=0 fine=1 · X.FINE=2 (assumed, verify on camera)
 
+    /** v22dsset: X.FINE (Extra Fine) can only be chosen on bodies whose menu offers it */
+    static boolean xFine;
+    static boolean supportsXFine(String model) {
+        return "ILCE-7RM2".equals(model) || "ILCE-7SM2".equals(model) || "ILCE-6300".equals(model)
+            || "ILCE-6500".equals(model) || "DSC-RX100M4".equals(model) || "DSC-RX100M5".equals(model)
+            || "DSC-RX10M2".equals(model) || "DSC-RX10M3".equals(model) || "DSC-RX1RM2".equals(model);
+    }
+    /** quality indexes selectable on this body, in menu order */
+    static int[] qualityOptions() {
+        return xFine ? new int[] { Q_RAW, Q_RAWJPG, Q_XFINE, Q_FINE, Q_STD }
+                     : new int[] { Q_RAW, Q_RAWJPG, Q_FINE, Q_STD };
+    }
+    static int qualityMax() { return xFine ? Q_XFINE : Q_STD; }
     // ---- rows
     static final int R_RECIPE = 0, R_STYLE = 1, R_SAT = 2, R_CON = 3, R_SHARP = 4, R_PP = 5, R_PE = 6, R_SUB = 7, R_WBMODE = 8, R_KELVIN = 9, R_AB = 10, R_GM = 11, R_EV = 12, R_DRO = 13, R_QUAL = 14;
     /** ROW_ID markers for rows without a fixed slot */
@@ -103,14 +116,16 @@ final class Params {
     static int qualityFromStore(int fmt, int jpg) {
         if (fmt == 1) return Q_RAW;
         if (fmt == 2) return Q_RAWJPG;
-        if (fmt == 0) return jpg == 0 ? Q_STD : Q_FINE;
+        if (fmt == 0) return jpg == 0 ? Q_STD : jpg == 1 ? Q_FINE : jpg == 2 ? Q_XFINE : Q_FINE;
         return -1;
     }
     /** quality from the runtime parameters, used when the stored pair is unknown */
     static int qualityFromRuntime(String storageFmt, String jpegQuality) {
         if ("raw".equals(storageFmt)) return Q_RAW;
         if ("rawjpeg".equals(storageFmt)) return Q_RAWJPG;
-        return "25".equals(jpegQuality) ? Q_STD : Q_FINE;
+        if ("25".equals(jpegQuality)) return Q_STD;
+        if ("64".equals(jpegQuality)) return Q_XFINE;
+        return Q_FINE;
     }
     /** a recipe's quality given the Factory base: effects need JPEG, so RAW bases become JPEG Fine for them */
     static int recipeQuality(Recipes.Recipe r, int base) { return r.isEffect() ? (base >= Q_FINE ? base : Q_FINE) : base; }
@@ -330,7 +345,7 @@ final class Params {
         if (row == R_WBMODE) { edit[R_WBMODE] = edit[R_WBMODE] == WB_KELVIN ? WB_AUTO : WB_KELVIN; return false; }
         if (row == R_SUB) { String[] sv = Recipes.subValues(edit[R_PE]); int n = sv == null ? 1 : sv.length; edit[R_SUB] = (edit[R_SUB] + n + dir) % n; return false; }
         if (row == R_STYLE) { int n = ROW_MAX[row] - ROW_MIN[row] + 1; do { edit[row] = ROW_MIN[row] + ((edit[row] - ROW_MIN[row] + n + dir) % n); } while (!Recipes.styleKnown(edit[row])); return false; }   // unidentified enum values are skipped
-        if (isChoice(row)) { int n = ROW_MAX[row] - ROW_MIN[row] + 1; edit[row] = ROW_MIN[row] + ((edit[row] - ROW_MIN[row] + n + dir) % n); }   // choices wrap around
+        if (isChoice(row)) { int hi = row == R_QUAL ? qualityMax() : ROW_MAX[row]; int n = hi - ROW_MIN[row] + 1; edit[row] = ROW_MIN[row] + ((edit[row] - ROW_MIN[row] + n + dir) % n); }   // choices wrap around
         else edit[row] = clamp(edit[row] + dir, ROW_MIN[row], ROW_MAX[row]);                                                                  // numbers clamp
         if (row == R_PE) { edit[R_SUB] = 0; edit[R_QUAL] = recipeQuality; if (edit[R_PE] != 0 && edit[R_QUAL] <= Q_RAWJPG) edit[R_QUAL] = Q_FINE; }
         return row == R_QUAL;
