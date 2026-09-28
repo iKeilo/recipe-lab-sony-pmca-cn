@@ -102,7 +102,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         super.onCreate(b);
         setContentView(R.layout.main);
         prefs = getPreferences(MODE_PRIVATE);
-        Params.xFine = Params.supportsXFine(KeyProbe.prop("model.name"));
+        Params.xFine = Params.supportsXFine(KeyProbe.prop("model.name"));   // refined against jpeg-quality-values once the camera answers (onResume)
         try { ZH = android.graphics.Typeface.createFromFile("/system/fonts/MYingHeiC-GB18030-SJ.ttf"); } catch (Throwable t) { ZH = null; }
         if (ZH == null) try { ZH = android.graphics.Typeface.createFromAsset(getAssets(), "fonts/MYingHeiC-GB18030-SJ.ttf"); } catch (Throwable t) { ZH = null; }
         recipe = Math.max(0, Math.min(Recipes.ALL.length - 1, prefs.getInt("recipe", 0)));
@@ -184,6 +184,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             cameraEx = open.invoke(null, 0, null);
             camera = (Camera) cx.getMethod("getNormalCamera").invoke(cameraEx);
             origFlat = camera.getParameters().flatten();
+            // v23dsset: X.FINE only when the body itself offers the 95 level (jpeg-quality-values=95,50,25 on A7S II)
+            try { String qv = camera.getParameters().get("jpeg-quality-values"); if (qv != null && !qv.contains("95")) Params.xFine = false; } catch (Throwable t) {}
             holder.addCallback(this);
             previewOk = true;
         } catch (Throwable t) { previewOk = false; previewErr = String.valueOf(t); }

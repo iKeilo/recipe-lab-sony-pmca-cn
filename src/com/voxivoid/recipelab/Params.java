@@ -38,7 +38,7 @@ final class Params {
     static final int Q_RAW = 0, Q_RAWJPG = 1, Q_XFINE = 2, Q_FINE = 3, Q_STD = 4;
     static final String[] Q_LABEL = { "RAW", "RAW+JPG", "X.FINE", "JPG Fine", "JPG Std" };
     static final String[] Q_FMT = { "raw", "rawjpeg", "jpeg", "jpeg", "jpeg" };
-    static final String[] Q_JPG = { "50", "50", "50", "50", "25" };
+    static final String[] Q_JPG = { "50", "50", "95", "50", "25" };   // runtime jpeg-quality: 95=Extra Fine 50=Fine 25=Std (verified on A7S II)
     static final int[] Q_FMT_CODE = { 1, 2, 0, 0, 0 }, Q_JPG_CODE = { 1, 1, 2, 1, 0 }; // verified: format raw=1 rawjpeg=2 jpeg=0 · jpeg std=0 fine=1 · X.FINE=2 (assumed, verify on camera)
 
     /** v22dsset: X.FINE (Extra Fine) can only be chosen on bodies whose menu offers it */
@@ -124,7 +124,7 @@ final class Params {
         if ("raw".equals(storageFmt)) return Q_RAW;
         if ("rawjpeg".equals(storageFmt)) return Q_RAWJPG;
         if ("25".equals(jpegQuality)) return Q_STD;
-        if ("64".equals(jpegQuality)) return Q_XFINE;
+        if ("95".equals(jpegQuality)) return Q_XFINE;
         return Q_FINE;
     }
     /** a recipe's quality given the Factory base: effects need JPEG, so RAW bases become JPEG Fine for them */
