@@ -25,6 +25,7 @@ public class Legend {
         fill.setColor(0xCCFFFFFF); fill.setStyle(Paint.Style.FILL);
         stroke.setColor(0xCCFFFFFF); stroke.setStyle(Paint.Style.STROKE);
         text.setColor(0x99FFFFFF);
+        if (MainActivity.ZH != null) { text.setTypeface(MainActivity.ZH); keyText.setTypeface(MainActivity.ZH); }
         keyText.setColor(0xCCFFFFFF); keyText.setTextAlign(Paint.Align.CENTER); keyText.setFakeBoldText(true);
     }
 
@@ -42,6 +43,9 @@ public class Legend {
         STAR.close();
         c.drawPath(STAR, p);
     }
+
+    /** v21dsset: apply the Chinese font after the view is inflated (the font is not ready during construction) */
+    public void setFont(android.graphics.Typeface t) { if (t != null) { text.setTypeface(t); keyText.setTypeface(t); } }
 
     /** natural height for a legend row at scale 1 */
     public float height() { return 16 * d; }

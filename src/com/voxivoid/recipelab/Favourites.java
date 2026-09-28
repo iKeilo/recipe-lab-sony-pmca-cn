@@ -69,7 +69,7 @@ final class Favourites {
 
     /** the toast after a toggle */
     static String toggleMessage(String recipeName, boolean on) {
-        return recipeName + (on ? " added to " : " removed from ") + NAME;
+        return recipeName + (on ? " 已加入 " : " 已从 " ) + NAME + (on ? "" : " 移除");
     }
 
     // ------------------------------------------------------------ browser navigation

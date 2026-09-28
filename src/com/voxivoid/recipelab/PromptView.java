@@ -14,7 +14,7 @@ import java.util.List;
 public class PromptView extends View {
     private static final int ACCENT = 0xFFF2B85C, INK = 0xFF1A1208;
     private static final int[] LEGEND_ICONS = { Legend.ENTER, Legend.MENU };
-    private static final String[] LEGEND_TEXT = { "confirm", "cancel" };
+    private final String[] legendText;
 
     private final Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG), edge = new Paint(Paint.ANTI_ALIAS_FLAG), title = new Paint(Paint.ANTI_ALIAS_FLAG),
             body = new Paint(Paint.ANTI_ALIAS_FLAG), opt = new Paint(Paint.ANTI_ALIAS_FLAG), pill = new Paint(Paint.ANTI_ALIAS_FLAG), note = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -30,6 +30,8 @@ public class PromptView extends View {
         super(c, a);
         d = c.getResources().getDisplayMetrics().density;
         legend = new Legend(d);
+        if (MainActivity.ZH != null) { title.setTypeface(MainActivity.ZH); body.setTypeface(MainActivity.ZH); opt.setTypeface(MainActivity.ZH); note.setTypeface(MainActivity.ZH); }
+        legendText = new String[] { c.getString(R.string.action_accept), c.getString(R.string.action_cancel) };
         bg.setColor(0xF0141414);
         edge.setColor(0x88F2B85C); edge.setStyle(Paint.Style.STROKE); edge.setStrokeWidth(d);
         title.setColor(0xFFFFFFFF); title.setTextSize(15 * d); title.setFakeBoldText(true);
@@ -37,6 +39,12 @@ public class PromptView extends View {
         opt.setTextSize(13 * d); opt.setFakeBoldText(true); opt.setTextAlign(Paint.Align.CENTER);
         note.setColor(0x88FFFFFF); note.setTextSize(10 * d);
     }
+
+    public void setFont(android.graphics.Typeface t) {
+        if (t != null) { title.setTypeface(t); body.setTypeface(t); opt.setTypeface(t); note.setTypeface(t); }
+        if (t != null) legend.setFont(t);
+    }
+
 
     public void set(String titleText, String bodyText, String[] options, int selected, String noteText) {
         this.titleText = titleText; this.bodyText = bodyText; this.options = options; this.selected = selected; this.noteText = noteText;
@@ -100,6 +108,6 @@ public class PromptView extends View {
             while (note.measureText(noteText) > avail && ns > 7 * d) { ns -= 0.5f * d; note.setTextSize(ns); }
             c.drawText(noteText, pad, y, note); note.setTextSize(10 * d); y += 14 * d;
         }
-        legend.draw(c, pad, y + legend.height() / 2 - 2 * d, w - 2 * pad, LEGEND_ICONS, LEGEND_TEXT);
+        legend.draw(c, pad, y + legend.height() / 2 - 2 * d, w - 2 * pad, LEGEND_ICONS, legendText);
     }
 }

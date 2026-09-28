@@ -23,6 +23,9 @@ public class HintBar extends View {
     /** what the key probe found; until it is set only the universal keys are named */
     public void setCaps(Keys.Caps k) { caps = k; invalidate(); }
 
+    /** apply the Chinese font once MainActivity has it loaded */
+    public void setFont(android.graphics.Typeface t) { legend.setFont(t); invalidate(); }
+
     @Override
     protected void onMeasure(int w, int h) { setMeasuredDimension(MeasureSpec.getSize(w), (int) legend.height()); }
 

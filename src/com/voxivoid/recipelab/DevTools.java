@@ -11,7 +11,7 @@ package com.voxivoid.recipelab;
 final class DevTools {
     private DevTools() {}
 
-    static final String APP_TITLE = "RECIPE LAB", TITLE = "DEV TOOLS", ABOUT_TITLE = "ABOUT";
+    static final String APP_TITLE = "配方实验室", TITLE = "开发者工具", ABOUT_TITLE = "关于";
 
     /** the two menu levels: the app menu a MENU hold opens, and the developer menu under it */
     static final int LEVEL_APP = 0, LEVEL_DEV = 1;
@@ -48,11 +48,11 @@ final class DevTools {
     /** an app menu row's title */
     static String appLabel(int row) {
         switch (row) {
-            case APP_BROWSE: return "Browse recipes";
-            case APP_PANEL: return "Panel visibility";
-            case APP_RESET: return "Reset settings";
-            case APP_ABOUT: return "About";
-            case APP_DEV: return "Developer  >";
+            case APP_BROWSE: return "浏览配方";
+            case APP_PANEL: return "面板显示";
+            case APP_RESET: return "重置设置";
+            case APP_ABOUT: return "关于";
+            case APP_DEV: return "开发者  >";
             default: return "?" + row;
         }
     }
@@ -60,11 +60,11 @@ final class DevTools {
     /** the line under an app menu row's title */
     static String appDetail(int row) {
         switch (row) {
-            case APP_BROWSE: return "Brands and favourites";
-            case APP_PANEL: return "What stays over the live image — left / right to change";
-            case APP_RESET: return "Back to the camera's factory look";
-            case APP_ABOUT: return "Version, camera, platform";
-            case APP_DEV: return "Settings snapshot, read-only check, samples, key logger";
+            case APP_BROWSE: return "品牌与收藏";
+            case APP_PANEL: return "实时画面上的信息层 — 左 / 右切换";
+            case APP_RESET: return "恢复相机出厂观感";
+            case APP_ABOUT: return "版本、相机、平台";
+            case APP_DEV: return "设置快照、只读检查、样张、按键记录";
             default: return "";
         }
     }
@@ -78,9 +78,9 @@ final class DevTools {
     /** a panel state as the menu names it */
     static String panelLabel(int overlay) {
         switch (overlay) {
-            case Params.OV_FULL: return "Full";
-            case Params.OV_PILL: return "Label";
-            case Params.OV_HIDDEN: return "Hidden";
+            case Params.OV_FULL: return "完整";
+            case Params.OV_PILL: return "标签";
+            case Params.OV_HIDDEN: return "隐藏";
             default: return "?";
         }
     }
@@ -94,19 +94,19 @@ final class DevTools {
     /** the About page: {name, value}. The version comes from the installed package at runtime, never from here. */
     static String[][] about(String version, String model, String platform) {
         return new String[][] {
-            { "version", orUnknown(version) },
-            { "camera", orUnknown(model) },
-            { "platform", orUnknown(platform) },
-            { "source", "github.com/voxivoid/recipe-lab-sony-pmca" },
+            { "版本", orUnknown(version) },
+            { "相机", orUnknown(model) },
+            { "平台", orUnknown(platform) },
+            { "源码", "github.com/voxivoid/recipe-lab-sony-pmca" },
         };
     }
 
     // ------------------------------------------------------------ the reset question (hold trash, or Reset settings)
     /** the question asked before the factory look is stored: it replaces whatever the camera has now */
-    static final String RESET_TITLE = "Reset to factory settings?",
-            RESET_BODY = "Stores Standard 0 / 0 / 0, auto white balance, no effect, in place of the current look";
+    static final String RESET_TITLE = "重置为出厂设置？",
+            RESET_BODY = "写入 标准 0 / 0 / 0、自动白平衡、无效果，取代当前观感";
     /** the answers; Cancel is the one highlighted when the question opens, so a stray centre press changes nothing */
-    static final String[] RESET_OPTIONS = { "Reset", "Cancel" };
+    static final String[] RESET_OPTIONS = { "重置", "取消" };
     static final int RESET_DEFAULT = 1;
 
     /**
@@ -119,15 +119,15 @@ final class DevTools {
             StringBuilder b = has[i] == null ? unk : has[i] ? yes : no;
             b.append(b.length() == 0 ? "" : " ").append(Keys.name(scans[i]));
         }
-        if (yes.length() == 0 && no.length() == 0) return "the camera would not say";
+        if (yes.length() == 0 && no.length() == 0) return "相机未报告";
         StringBuilder out = new StringBuilder();
-        if (yes.length() > 0) out.append("has ").append(yes);
-        if (no.length() > 0) out.append(out.length() == 0 ? "" : "  ·  ").append("lacks ").append(no);
-        if (unk.length() > 0) out.append(out.length() == 0 ? "" : "  ·  ").append("unknown ").append(unk);
+        if (yes.length() > 0) out.append("有 ").append(yes);
+        if (no.length() > 0) out.append(out.length() == 0 ? "" : "  ·  ").append("无 ").append(no);
+        if (unk.length() > 0) out.append(out.length() == 0 ? "" : "  ·  ").append("未知 ").append(unk);
         return out.toString();
     }
 
-    private static String orUnknown(String s) { return s == null || s.isEmpty() ? "unknown" : s; }
+    private static String orUnknown(String s) { return s == null || s.isEmpty() ? "未知" : s; }
 
     // ------------------------------------------------------------ the key logger
     /** how many events the logger keeps on screen, newest first */
@@ -136,7 +136,7 @@ final class DevTools {
     static final String KEY_LOG = "keys.txt";
 
     /** the logger page title: the body it runs on */
-    static String logTitle(String model, String platform) { return "KEY LOGGER  ·  " + orUnknown(model) + "  ·  " + orUnknown(platform); }
+    static String logTitle(String model, String platform) { return "按键记录  ·  " + orUnknown(model) + "  ·  " + orUnknown(platform); }
 
     /**
      * One key event: {"down 595", "DELETE  ·  repeat 0  ·  logic 1103"}. The scan code is what a compatibility report
@@ -144,8 +144,8 @@ final class DevTools {
      */
     static String[] logLine(boolean down, int scan, int repeat, Integer logic) {
         String name = Keys.name(scan);
-        return new String[] { (down ? "down " : "up   ") + scan,
-                (name.isEmpty() ? "?" : name) + "  ·  repeat " + repeat + (logic == null ? "" : "  ·  logic " + logic) };
+        return new String[] { (down ? "按下 " : "抬起 ") + scan,
+                (name.isEmpty() ? "?" : name) + "  ·  重复 " + repeat + (logic == null ? "" : "  ·  逻辑 " + logic) };
     }
 
     // ------------------------------------------------------------ the developer menu
@@ -155,11 +155,11 @@ final class DevTools {
     /** a row's title; the snapshot row and the delay row say what they will do next */
     static String rowLabel(int row, boolean snapshotTaken, int settle) {
         switch (row) {
-            case ROW_SNAPSHOT: return snapshotTaken ? "Settings diff" : "Settings snapshot";
-            case ROW_LOCKS: return "Read-only check — " + Params.allSlots().size() + " slots";
-            case ROW_SAMPLES: return "Shoot samples — " + Recipes.ALL.length + " recipes";
-            case ROW_SETTLE: return "Settle delay";
-            case ROW_KEYS: return "Key logger";
+            case ROW_SNAPSHOT: return snapshotTaken ? "设置对比" : "设置快照";
+            case ROW_LOCKS: return "只读检查 — " + Params.allSlots().size() + " 个槽位";
+            case ROW_SAMPLES: return "拍摄样张 — " + Recipes.ALL.length + " 个配方";
+            case ROW_SETTLE: return "稳定延时";
+            case ROW_KEYS: return "按键记录";
             default: return "?" + row;
         }
     }
@@ -167,11 +167,11 @@ final class DevTools {
     /** the line under a row's title */
     static String rowDetail(int row, boolean snapshotTaken) {
         switch (row) {
-            case ROW_SNAPSHOT: return snapshotTaken ? "Compare every settings id against the snapshot" : "Store the value of every settings id";
-            case ROW_LOCKS: return "Test every slot a recipe writes for the read-only flag";
-            case ROW_SAMPLES: return "One JPEG per recipe, in table order — MENU stops the run";
-            case ROW_SETTLE: return "Wait after applying a recipe before the shutter fires — left / right to change";
-            case ROW_KEYS: return "Show every key's scan code — hold MENU to leave";
+            case ROW_SNAPSHOT: return snapshotTaken ? "将每个设置 ID 与快照对比" : "记录每个设置 ID 的当前值";
+            case ROW_LOCKS: return "检查配方会写入的每个槽位是否带只读标志";
+            case ROW_SAMPLES: return "每个配方一张 JPEG，按表顺序 — MENU 停止";
+            case ROW_SETTLE: return "应用配方后、快门触发前的等待时间 — 左 / 右修改";
+            case ROW_KEYS: return "显示每个按键的扫描码 — 长按 MENU 退出";
             default: return "";
         }
     }
@@ -189,32 +189,32 @@ final class DevTools {
     /** a delay as the menu shows it: "1.2 s" (built by hand — String.format would follow the camera's locale) */
     static String settleLabel(int idx) {
         int ms = SETTLE_MS[clampSettle(idx)];
-        return (ms / 1000) + "." + (ms % 1000) / 100 + " s";
+        return (ms / 1000) + "." + (ms % 1000) / 100 + " 秒";
     }
 
     // ------------------------------------------------------------ the sample run
     /** the run needs the live camera: without it nothing is applied and nothing can be shot */
-    static final String NO_PREVIEW = "No live preview — the sample run needs the camera";
+    static final String NO_PREVIEW = "无实时预览 — 拍摄样张需要相机";
 
     /** the sticky line while the run walks the table; frames count from 1 */
     static String progress(int frame, int total, String recipeName) {
-        return "Shooting " + frame + " / " + total + "  ·  " + recipeName + "   —   MENU stops";
+        return "拍摄中 " + frame + " / " + total + "  ·  " + recipeName + "   —   MENU 停止";
     }
 
     /** the run reached the end of the table */
     static String doneMessage(int shot, int total) {
-        return "Samples done — " + shot + " of " + total + " frames shot, listed in " + MANIFEST;
+        return "样张完成 — 已拍 " + shot + " / " + total + " 帧，清单见 " + MANIFEST;
     }
 
     /** MENU during the run */
     static String stoppedMessage(int shot, int total) {
-        return shot == 0 ? "Sample run stopped before the first frame"
-                : "Sample run stopped — " + shot + " of " + total + " frames shot, listed in " + MANIFEST;
+        return shot == 0 ? "样张运行在第一帧前停止"
+                : "样张运行已停止 — 已拍 " + shot + " / " + total + " 帧，清单见 " + MANIFEST;
     }
 
     /** the camera refused a capture: the run cannot go on, and the frames so far are still listed */
     static String shootFailed(int frame, int shot, String error) {
-        return "Shutter failed on frame " + frame + ": " + error + "  —  " + shot + " frames shot, listed in " + MANIFEST;
+        return "第 " + frame + " 帧快门失败: " + error + "  —  已拍 " + shot + " 帧，清单见 " + MANIFEST;
     }
 
     // ------------------------------------------------------------ the manifest

@@ -230,14 +230,14 @@ final class Params {
      * recipe in the store.
      */
     static String lockedMessage(List<Integer> ids) {
-        return "Not written — the camera holds " + (ids.size() == 1 ? "this setting" : "these settings") + " read-only: " + slotNames(ids)
-                + ". Unlock the settings store with OpenMemories-Tweak (Protection → Unlock protected settings), then pick the recipe again.";
+        return "未写入 — 相机将 " + (ids.size() == 1 ? "该设置" : "这些设置") + " 设为只读: " + slotNames(ids)
+                + "。用 OpenMemories-Tweak 解锁设置库 (Protection → Unlock protected settings) 后重试。";
     }
 
     /** the camera refused a write: which setting stopped it, and how much of the recipe went in before it did */
     static String writeFailedMessage(int id, String error, int written) {
-        return "WRITE FAILED on " + slotName(id) + " (" + String.format("%08x", id) + "): " + error
-                + (written == 0 ? " — nothing was written" : " — " + written + " byte" + (written == 1 ? "" : "s") + " written before it stopped");
+        return "写入失败 " + slotName(id) + " (" + String.format("%08x", id) + "): " + error
+                + (written == 0 ? " — 未写入任何内容" : " — 已写入 " + written + " 字节后中止");
     }
 
     /**
@@ -252,9 +252,9 @@ final class Params {
             if (attrs[i] < 0) unreadable++;
             else if (slotLocked(attrs[i])) locked.add(ids.get(i));
         }
-        return ids.size() + " recipe slots checked  ·  "
-                + (locked.isEmpty() ? "none read-only" : locked.size() + " read-only: " + slotNames(locked))
-                + (unreadable == 0 ? "" : "  ·  " + unreadable + " would not answer");
+        return "检查 " + ids.size() + " 个配方槽位  ·  "
+                + (locked.isEmpty() ? "无只读" : locked.size() + " 个只读: " + slotNames(locked))
+                + (unreadable == 0 ? "" : "  ·  " + unreadable + " 个未响应");
     }
 
     /** the same check, one line per slot, as it is written to the file a compatibility report can quote */
@@ -428,8 +428,8 @@ final class Params {
     /** title and explanation of the quality-change prompt */
     static String[] qualityPrompt(int[] cur, int[] edit) {
         return new String[] {
-            "Quality: " + Q_LABEL[cur[R_QUAL]] + "  →  " + Q_LABEL[edit[R_QUAL]],
-            edit[R_PE] != 0 ? "JPEG is needed to apply this recipe." : "Creative Style recipes use the Factory recipe's quality." };
+            "画质: " + Q_LABEL[cur[R_QUAL]] + "  →  " + Q_LABEL[edit[R_QUAL]],
+            edit[R_PE] != 0 ? "应用此配方需要 JPEG。" : "创意风格配方使用出厂配方的画质。" };
     }
 
     // ------------------------------------------------------------ snapshot / diff tool

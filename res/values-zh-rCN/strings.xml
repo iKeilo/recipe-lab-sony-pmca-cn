@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 汉化资源骨架：接入代码时保持这些 key 的语义稳定。 -->
+    <string name="app_name">配方实验室</string>
+
+    <!-- 主界面字段 -->
+    <string name="label_recipe">配方</string>
+    <string name="label_style">风格</string>
+    <string name="label_saturation">饱和度</string>
+    <string name="label_contrast">对比度</string>
+    <string name="label_sharpness">锐度</string>
+    <string name="label_matrix">矩阵</string>
+    <string name="label_effect">效果</string>
+    <string name="label_sub">子项</string>
+    <string name="label_white_balance">白平衡</string>
+    <string name="label_kelvin">色温</string>
+    <string name="label_ab">A-B</string>
+    <string name="label_gm">G-M</string>
+    <string name="label_ev">曝光补偿</string>
+    <string name="label_dro">DRO</string>
+    <string name="label_quality">画质</string>
+
+    <!-- 状态、操作和提示 -->
+    <string name="status_active">已应用</string>
+    <string name="status_preview">预览中</string>
+    <string name="action_accept">确认</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_browse">浏览</string>
+    <string name="action_recipes">配方列表</string>
+    <string name="action_pick">OK</string>
+    <string name="action_select">选择</string>
+    <string name="action_move">移动</string>
+    <string name="action_edit">编辑</string>
+    <string name="action_close">关闭</string>
+    <string name="action_exit">退出</string>
+    <string name="action_factory">恢复出厂</string>
+    <string name="action_hide">面板</string>
+    <string name="action_favourites">收藏</string>
+    <string name="hint_favourite_hold">长按收藏</string>
+    <string name="favourites_empty_title">暂未收藏配方</string>
+    <string name="favourites_empty_hint">在配方上长按中心键即可收藏</string>
+
+    <!-- 质量与写入提示；RAW、JPEG、DRO、PE、CS 等设备标识保持原样。 -->
+    <string name="quality_raw">RAW</string>
+    <string name="quality_raw_jpg">RAW+JPG</string>
+    <string name="quality_jpg_fine">JPG 精细</string>
+    <string name="quality_jpg_std">JPG 标准</string>
+    <string name="badge_pe">PE</string>
+    <string name="badge_cs">CS</string>
+    <string name="message_not_picked">尚未应用</string>
+    <string name="message_already_picked">当前配方已应用，无需写入</string>
+    <string name="message_factory_staged">已准备出厂参数，按中心键应用</string>
+    <string name="message_previewed">正在预览，按中心键应用</string>
+    <string name="message_power_cycle">请将相机关机后重新开机以应用到所有模式</string>
+</resources>

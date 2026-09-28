@@ -86,6 +86,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private final Runnable runNext = new Runnable() { public void run() { cancelCapture(); resumePreview(); sampleStage(); } };
 
     private SurfaceHolder holder;
+    static android.graphics.Typeface ZH = null;
     private Object cameraEx; private Camera camera; private String origFlat;
     private int row = 0, recipe = 0, overlay = OV_FULL;   // Params.OV_*: the full panel, the pill, nothing, the browser
     private boolean focus = false;                        // a chip is focused: UP/DOWN change its value
@@ -101,6 +102,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         super.onCreate(b);
         setContentView(R.layout.main);
         prefs = getPreferences(MODE_PRIVATE);
+        try { ZH = android.graphics.Typeface.createFromFile("/system/fonts/MYingHeiC-GB18030-SJ.ttf"); } catch (Throwable t) { ZH = null; }
+        if (ZH == null) try { ZH = android.graphics.Typeface.createFromAsset(getAssets(), "fonts/MYingHeiC-GB18030-SJ.ttf"); } catch (Throwable t) { ZH = null; }
         recipe = Math.max(0, Math.min(Recipes.ALL.length - 1, prefs.getInt("recipe", 0)));
         favs = Favourites.decode(prefs.getString("favourites", ""));
         settleIdx = DevTools.clampSettle(prefs.getInt("settle", DevTools.SETTLE_DEFAULT));
@@ -120,6 +123,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         menu = (MenuView) findViewById(R.id.menu);
         chips = (LinearLayout) findViewById(R.id.chips);
         buildChips();
+        if (ZH != null) { for (android.view.View vv : new android.view.View[] { name, badge, tag, count, meta, mini, toast }) if (vv instanceof TextView) ((TextView) vv).setTypeface(ZH);
+            menu.setFont(ZH); picker.setFont(ZH); prompt.setFont(ZH); hints.setFont(ZH); }
         caps = KeyProbe.caps();
         hints.setCaps(caps); picker.setCaps(caps);
         SurfaceView sv = (SurfaceView) findViewById(R.id.surface);
@@ -138,11 +143,33 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             lp.rightMargin = dp(5);
             c.setLayoutParams(lp);
-            TextView l = new TextView(this); l.setTextSize(9); l.setText(ROW_NAME[i]);
+            TextView l = new TextView(this); l.setTextSize(9); l.setText(getString(rowLabelId(i)));
             TextView v = new TextView(this); v.setTextSize(13); v.setTypeface(Typeface.DEFAULT_BOLD); v.setSingleLine(true);
+            if (ZH != null) { l.setTypeface(ZH); v.setTypeface(ZH); }
             c.addView(l); c.addView(v);
             chips.addView(c);
             chip[i] = c; chipLabel[i] = l; chipValue[i] = v;
+        }
+    }
+
+    /** Display labels are localized; Params.ROW_NAME remains the canonical test/diagnostic vocabulary. */
+    private int rowLabelId(int row) {
+        switch (row) {
+            case R_RECIPE: return R.string.label_recipe;
+            case R_STYLE: return R.string.label_style;
+            case R_SAT: return R.string.label_saturation;
+            case R_CON: return R.string.label_contrast;
+            case R_SHARP: return R.string.label_sharpness;
+            case R_PE: return R.string.label_effect;
+            case R_SUB: return R.string.label_sub;
+            case R_WBMODE: return R.string.label_white_balance;
+            case R_KELVIN: return R.string.label_kelvin;
+            case R_AB: return R.string.label_ab;
+            case R_GM: return R.string.label_gm;
+            case R_EV: return R.string.label_ev;
+            case R_DRO: return R.string.label_dro;
+            case R_QUAL: return R.string.label_quality;
+            default: return R.string.label_recipe;
         }
     }
 
@@ -203,7 +230,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                 if (id == QUALITY_SLOTS) { cur[i] = edit[i] = readQuality(); continue; }
                 cur[i] = edit[i] = Params.fromStore(id, NativeBackup.readByte(id));
             }
-        } catch (Throwable t) { showToast("Read failed: " + t.getMessage(), 0); }
+        } catch (Throwable t) { showToast("读取失败：" + t.getMessage(), 0); }
     }
 
     private void stageRecipe() {
@@ -257,7 +284,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
     private void writeAll(boolean confirmed) {
         if (!confirmed && qualityChanges()) { openPrompt(); return; }
-        if (!dirty()) { showToast("Already picked — nothing to write", 2500); return; }
+        if (!dirty()) { showToast("当前配方已应用，无需写入", 2500); return; }
         int storedSub = storedSub();
         int n = Params.dirtyRows(cur, edit, storedSub);
         List<Params.Write> ws = Params.writes(cur, edit, storedSub);
@@ -272,13 +299,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         }
         if (written > 0) NativeBackup.sync();                    // Backup_sync_all is void: nothing to catch, nothing to report
         boolean ok = msg == null;
-        if (ok) msg = "Picked — " + n + " value" + (n == 1 ? "" : "s") + " written, power-cycle the camera to apply everywhere";
+        if (ok) msg = "已应用 — 写入 " + n + " 个值，断电重启后全局生效";
         load(); stageRecipe();
         showToast(msg, ok ? 5000 : 0); render();
     }
 
     // ------------------------------------------------------------ the two questions: RAW vs Picture Effect, and reset to factory
-    private static final String[] PROMPT_OPTS = { "Accept", "Cancel" };
+    private String[] promptOptions() { return new String[] { getString(R.string.action_accept), getString(R.string.action_cancel) }; }
 
     private void openPrompt() { promptOpen = true; promptReset = false; promptSel = 0; renderPrompt(); }
 
@@ -289,7 +316,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         if (promptReset) prompt.set(DevTools.RESET_TITLE, DevTools.RESET_BODY, DevTools.RESET_OPTIONS, promptSel, null);
         else {
             String[] q = Params.qualityPrompt(cur, edit);
-            prompt.set(q[0], q[1], PROMPT_OPTS, promptSel, qualityPersistent() ? null : "quality slot not located yet — live view only");
+            prompt.set(q[0], q[1], promptOptions(), promptSel, qualityPersistent() ? null : "画质槽位未定位 — 仅实时预览生效");
         }
         prompt.setVisibility(View.VISIBLE);
     }
@@ -301,8 +328,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             case K_LEFT: case K_WHEEL_CCW: case K_DIAL_CCW: case K_RIGHT: case K_WHEEL_CW: case K_DIAL_CW: promptSel ^= 1; renderPrompt(); return true;
             case K_ENTER:
                 closePrompt();
-                if (promptReset) { if (promptSel == 0) storeFactory(); else showToast("Not reset", 2000); render(); return true; }
-                if (promptSel == 0) writeAll(true); else showToast("Not picked", 2000);   // cancel: recipe stays previewed only
+                if (promptReset) { if (promptSel == 0) storeFactory(); else showToast("未重置", 2000); render(); return true; }
+                if (promptSel == 0) writeAll(true); else showToast("未应用", 2000);   // cancel: recipe stays previewed only
                 render(); return true;
             case K_MENU: case K_SK1: swallowMenuUp = true; closePrompt(); render(); return true;
         }
@@ -311,7 +338,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
     private void cycleQuality() {
         edit[R_QUAL] = (edit[R_QUAL] + 1) % 4; qualityChanged(); applyPreview(); render();
-        showToast("Quality: " + Q_LABEL[edit[R_QUAL]] + (qualityPersistent() ? "  — ENTER to pick" : "  (live view only until the slot is known)"), 2500);
+        showToast("画质: " + UiText.value(R_QUAL, edit[R_QUAL], edit) + (qualityPersistent() ? "  — 按中心键应用" : "  (槽位未定位前仅实时预览)"), 2500);
     }
 
     // ------------------------------------------------------------ snapshot / diff of the whole settings store (developer menu)
@@ -334,7 +361,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                 FileOutputStream o = new FileOutputStream(f);
                 for (int[] e : ids) { byte[] v; try { v = NativeBackup.read(e[0]); } catch (Throwable t) { v = new byte[0]; } o.write(v.length); o.write(v); }
                 o.close();
-                showToast("Snapshot of " + ids.size() + " settings taken. Change a menu setting, reopen, run Settings diff.", 6000);
+                showToast("已对 " + ids.size() + " 项设置拍快照。改一项菜单设置后重开本页，运行 设置对比。", 6000);
                 return;
             }
             FileInputStream in = new FileInputStream(f);
@@ -348,10 +375,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
                 }
             }
             in.close(); f.delete();
-            String text = changed + " changed  " + sb;
+            String text = changed + " 项变化  " + sb;
             java.io.FileWriter w = new java.io.FileWriter(new File(getFilesDir(), "diff.txt"), true); w.write(text + "\n"); w.close();
             showToast(text, 0);
-        } catch (Throwable t) { showToast("snapshot error: " + t, 0); }
+        } catch (Throwable t) { showToast("快照错误: " + t, 0); }
     }
 
     // ------------------------------------------------------------ read-only check of the slots a recipe writes
@@ -370,7 +397,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         try {
             java.io.FileWriter w = new java.io.FileWriter(new File(getFilesDir(), "locks.txt"), true);
             try { w.write(text + "\n" + Params.lockLines(ids, attrs)); } finally { w.close(); }
-        } catch (Throwable t) { text += "  ·  locks.txt failed: " + t; }
+        } catch (Throwable t) { text += "  ·  locks.txt 写入失败: " + t; }
         showToast(text, 0);
     }
 
@@ -484,7 +511,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
     private void renderLogger() {
         String[][] lines = new String[logLines.size() + 1][];
-        lines[0] = new String[] { "keys", keysFound() };
+        lines[0] = new String[] { "按键", keysFound() };
         for (int i = 0; i < logLines.size(); i++) lines[i + 1] = logLines.get(logLines.size() - 1 - i);   // newest first
         menu.setPage(DevTools.logTitle(KeyProbe.prop("model.name"), KeyProbe.prop("version.platform")), lines, Keys.hints(Keys.H_LOGGER, caps));
         menu.setVisibility(View.VISIBLE);
@@ -575,7 +602,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         try {
             java.io.FileWriter w = new java.io.FileWriter(new File(getFilesDir(), DevTools.MANIFEST), true);
             try { w.write(runLog.toString()); } finally { w.close(); }
-        } catch (Throwable t) { return "  ·  " + DevTools.MANIFEST + " failed: " + t; }
+        } catch (Throwable t) { return "  ·  " + DevTools.MANIFEST + " 写入失败: " + t; }
         finally { runLog = null; }
         return "";
     }
@@ -641,16 +668,16 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             tag.setText(edit[R_PE] != 0 ? "PE" : "CS");
             tag.setTextColor(edit[R_PE] != 0 ? ACCENT : 0xDDFFFFFF);
             fav.setVisibility(favs.contains(recipe) ? View.VISIBLE : View.GONE);
-            if (dirty) { badge.setText("PREVIEW"); badge.setBackgroundResource(R.drawable.badge_warn); }
-            else { badge.setText("ACTIVE"); badge.setBackgroundResource(R.drawable.badge_ok); }
-            meta.setText(Params.metaLine(cur, edit, previewOk ? null : previewErr));
+            if (dirty) { badge.setText("预览"); badge.setBackgroundResource(R.drawable.badge_warn); }
+            else { badge.setText("生效"); badge.setBackgroundResource(R.drawable.badge_ok); }
+            meta.setText(UiText.meta(Params.metaLine(cur, edit, previewOk ? null : previewErr)));
             for (int i : ORDER) {
                 chip[i].setVisibility(rowVisible(i) ? View.VISIBLE : View.GONE);
                 boolean sel = i == row, ch = rowDirty(i), foc = sel && focus;
                 chip[i].setBackgroundResource(foc ? R.drawable.chip_sel : sel ? R.drawable.chip_hi : R.drawable.chip);
                 chipLabel[i].setTextColor(foc ? INK : sel ? ACCENT : DIM);
                 chipValue[i].setTextColor(foc ? INK : ch ? ACCENT : WHITE);
-                chipValue[i].setText(Params.fmt(i, edit[i], edit));
+                chipValue[i].setText(UiText.value(i, edit[i], edit));
             }
             if (row == 0) chipScroll.post(new Runnable() { public void run() { chipScroll.smoothScrollTo(0, 0); } });
             else {
@@ -663,7 +690,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             hints.setMode(row == 0 ? HintBar.RECIPE : focus ? HintBar.EDIT : HintBar.CHIPS);
         } else if (overlay == OV_PILL) {
             panel.setVisibility(View.GONE); mini.setVisibility(View.VISIBLE);
-            mini.setText(Params.miniLine(recipe, cur, edit, dirty));
+            mini.setText(UiText.mini(Params.miniLine(recipe, cur, edit, dirty)));
         } else {
             panel.setVisibility(View.GONE); mini.setVisibility(View.GONE);
         }
@@ -721,7 +748,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
     /** the centre button on a recipe in the browser: close it, leaving that recipe previewed */
     private void pickInBrowser() {
-        openBrowser(false); showToast(Recipes.ALL[recipe].name + " previewed — ENTER to pick", 3000);
+        openBrowser(false); showToast(Recipes.ALL[recipe].name + " 已预览 — 按中心键应用", 3000);
     }
 
     /** the reset question answered Reset: the factory look, stored — the same store as a centre press */
@@ -738,7 +765,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private void menuHoldFired() {
         if (menuKeyHold.fire() != Keys.Hold.HOLD) return;
         swallowMenuUp = true;
-        if (logging) { stopLogger(); showToast("Key logger stopped — events are in " + DevTools.KEY_LOG, 4000); return; }
+        if (logging) { stopLogger(); showToast("按键记录已停止 — 事件保存在 " + DevTools.KEY_LOG, 4000); return; }
         if (!running && !promptOpen && !menuOpen && menuHoldArms(overlay, focus)) openMenu(DevTools.LEVEL_APP);
     }
 
@@ -817,7 +844,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         if (promptOpen) return promptKey(sc);
         if (menuOpen) return menuKey(sc);
         if (sc == K_ENTER) { enterDown(e.getRepeatCount()); return true; }
-        if (sc == K_AEL || sc == K_C1 || sc == K_DISP) return true;   // not bound on any screen (issue #18)
+        if (sc == K_AEL || sc == K_DISP) return true;                     // AEL/DISP have no app binding (issue #18); C1 passes through to the camera menu
         if (overlay == OV_BROWSER && sc != K_PLAY) return browserKey(sc);
         switch (sc) {
             case K_LEFT: case K_RIGHT: {
@@ -871,7 +898,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             case K_S1: try { camera.cancelAutoFocus(); } catch (Throwable t) {} return true;
             case K_S2: cancelCapture(); return true;
             case K_UP: case K_DOWN: case K_LEFT: case K_RIGHT: case K_PLAY: case K_DISP:
-            case K_DELETE: case K_SK2: case K_C1: case K_AEL: case K_WHEEL_CW: case K_WHEEL_CCW: case K_DIAL_CW: case K_DIAL_CCW: return true;
+            case K_DELETE: case K_SK2: case K_AEL: case K_WHEEL_CW: case K_WHEEL_CCW: case K_DIAL_CW: case K_DIAL_CCW: return true;
         }
         return super.onKeyUp(keyCode, e);
     }

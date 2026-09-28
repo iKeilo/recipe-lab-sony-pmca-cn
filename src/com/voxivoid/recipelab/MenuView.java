@@ -35,6 +35,7 @@ public class MenuView extends View {
         super(c, a);
         d = c.getResources().getDisplayMetrics().density;
         legend = new Legend(d);
+        if (MainActivity.ZH != null) { item.setTypeface(MainActivity.ZH); head.setTypeface(MainActivity.ZH); small.setTypeface(MainActivity.ZH); }
         bg.setColor(0xF0101010);
         head.setColor(ACCENT); head.setTextSize(9 * d); head.setFakeBoldText(true);
         item.setTextSize(13 * d); item.setFakeBoldText(true);
@@ -49,6 +50,16 @@ public class MenuView extends View {
      * Rows to pick from: their titles, their explanation lines, their values (null for a row without one — or the whole
      * array null), which one is highlighted, and the legend under them.
      */
+    public void setFont(android.graphics.Typeface t) {
+        if (t != null) head.setTypeface(t);
+        if (t != null) item.setTypeface(t);
+        if (t != null) small.setTypeface(t);
+        if (t != null) key.setTypeface(t);
+        if (t != null) value.setTypeface(t);
+        if (t != null) legend.setFont(t);
+    }
+
+
     public void set(String title, String[] labels, String[] details, String[] values, int selected, Keys.Hints hints) {
         this.title = title; this.labels = labels; this.details = details; this.selected = selected; this.hints = hints; page = false;
         this.values = values != null ? values : new String[labels.length];
@@ -106,7 +117,7 @@ public class MenuView extends View {
 
     /** "◀ Full ▶" ending at {@code right}, centred on {@code cy}: the arrows say left / right change it */
     private void drawValue(Canvas c, String text, float right, float cy, boolean on) {
-        float a = 4.5f * d, gap = 7 * d, tw = Math.max(value.measureText(text), value.measureText("Hidden"));   // a steady width as it changes
+        float a = 4.5f * d, gap = 7 * d, tw = Math.max(value.measureText(text), value.measureText("隐藏"));   // a steady width as it changes
         float rx = right - 4 * d, lx = rx - a - gap - tw - gap - a;
         int col = on ? INK : 0xCCFFFFFF;
         arrow.setColor(on ? INK : 0x88FFFFFF); value.setColor(col);

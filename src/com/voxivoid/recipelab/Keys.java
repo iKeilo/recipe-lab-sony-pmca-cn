@@ -149,28 +149,30 @@ final class Keys {
         int fn = caps.hasFn() ? I_FN : I_NONE;
         switch (mode) {
             case H_RECIPE: {
-                Row r = new Row().add(I_ENTER, "pick");
-                if (caps.hasFn()) r.add(I_FN, "browse");
-                return r.add(I_ENTER, "fav (hold)").add(I_MENU, "menu (hold)").add(I_TRASH, "hide").add(I_MENU, "exit").done();
+                Row r = new Row().add(I_ENTER, "应用");
+                if (caps.hasFn()) r.add(I_FN, "列表");
+                
+                return r.add(I_ENTER, "收藏(长按)").add(I_MENU, "菜单(长按)").add(I_TRASH, "隐藏").add(I_MENU, "退出").done();
             }
             case H_CHIPS: {
-                Row r = new Row().add(I_ENTER, "edit");
-                if (caps.hasFn()) r.add(I_FN, "browse");
-                return r.add(I_MENU, "menu (hold)").add(I_TRASH, "hide").add(I_MENU, "exit").done();
+                Row r = new Row().add(I_ENTER, "编辑");
+                if (caps.hasFn()) r.add(I_FN, "列表");
+                
+                return r.add(I_MENU, "菜单(长按)").add(I_TRASH, "隐藏").add(I_MENU, "退出").done();
             }
-            case H_EDIT: return new Row().add(I_ENTER, "done").done();
-            case H_BRANDS: return new Row().add(I_ENTER, "recipes").add(I_MENU, fn, "close").done();
-            case H_RECIPES: return new Row().add(I_ENTER, "pick").add(I_ENTER, "fav (hold)").add(I_MENU, fn, "close").done();
-            case H_MENU_TOP: return new Row().add(I_UPDOWN, "move").add(I_ENTER, "select").add(I_MENU, "close").done();
-            case H_MENU_SUB: return new Row().add(I_UPDOWN, "move").add(I_ENTER, "select").add(I_MENU, "back").done();
-            case H_MENU_TOP_VALUE: return new Row().add(I_UPDOWN, "move").add(I_LEFTRIGHT, "change").add(I_MENU, "close").done();
-            case H_MENU_SUB_VALUE: return new Row().add(I_UPDOWN, "move").add(I_LEFTRIGHT, "change").add(I_MENU, "back").done();
-            case H_PAGE: return new Row().add(I_MENU, "back").done();
-            case H_LOGGER: return new Row().add(I_MENU, "exit (hold)").done();
+            case H_EDIT: return new Row().add(I_ENTER, "完成").done();
+            case H_BRANDS: return new Row().add(I_ENTER, "配方").add(I_MENU, fn, "关闭").done();
+            case H_RECIPES: return new Row().add(I_ENTER, "应用").add(I_ENTER, "收藏(长按)").add(I_MENU, fn, "关闭").done();
+            case H_MENU_TOP: return new Row().add(I_UPDOWN, "移动").add(I_ENTER, "选择").add(I_MENU, "关闭").done();
+            case H_MENU_SUB: return new Row().add(I_UPDOWN, "移动").add(I_ENTER, "选择").add(I_MENU, "返回").done();
+            case H_MENU_TOP_VALUE: return new Row().add(I_UPDOWN, "移动").add(I_LEFTRIGHT, "切换").add(I_MENU, "关闭").done();
+            case H_MENU_SUB_VALUE: return new Row().add(I_UPDOWN, "移动").add(I_LEFTRIGHT, "切换").add(I_MENU, "返回").done();
+            case H_PAGE: return new Row().add(I_MENU, "返回").done();
+            case H_LOGGER: return new Row().add(I_MENU, "退出(长按)").done();
             default: return new Row().done();
         }
     }
 
     /** shown once, on the first launch of a build with these keys */
-    static final String NOTICE = "Hold MENU for the menu  ·  trash hides the panel  ·  hold trash to reset";
+    static final String NOTICE = "长按 MENU 打开菜单  ·  垃圾桶键隐藏面板  ·  长按垃圾桶键重置";
 }
